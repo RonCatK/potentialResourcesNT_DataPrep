@@ -1,6 +1,6 @@
-makePotentialMining <- function(harmonizedList, 
+makePotentialMining <- function(disturbanceList, 
                                 whatToCombine){
-  laysToWork <- harmonizedList[["mining"]][names(harmonizedList[["mining"]]) %in% 
+  laysToWork <- disturbanceList[["mining"]][names(disturbanceList[["mining"]]) %in% 
                                              whatToCombine[datasetName == "mining", 
                                                            dataClasses]]
   # Get the layers with needed fields

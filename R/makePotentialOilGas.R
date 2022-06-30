@@ -1,6 +1,6 @@
-makePotentialOilGas <- function(harmonizedList, 
+makePotentialOilGas <- function(disturbanceList, 
                                 whatToCombine){
-  laysToWork <- harmonizedList[["oilGas"]][names(harmonizedList[["oilGas"]]) %in% 
+  laysToWork <- disturbanceList[["oilGas"]][names(disturbanceList[["oilGas"]]) %in% 
                                              whatToCombine[datasetName == "oilGas", 
                                                            dataClasses]]
   whichClaim <- laysToWork[unlist(lapply(laysToWork, function(L){

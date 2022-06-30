@@ -1,13 +1,13 @@
-replaceList <- function(harmonizedList,
+replaceList <- function(disturbanceList,
                         potentialOil,
                         potentialMining){
   # Oil and Gas
-  harmonizedList$oilGas[names(harmonizedList$oilGas) == "potentialOilGas"] <- NULL
-  harmonizedList$oilGas[["potentialOilGas"]] <- potentialOil
+  disturbanceList$oilGas[names(disturbanceList$oilGas) == "potentialOilGas"] <- NULL
+  disturbanceList$oilGas[["potentialOilGas"]] <- potentialOil
   
   # Mining
-  harmonizedList$mining[names(harmonizedList$mining) == "potentialMining"] <- NULL
-  harmonizedList$mining[["potentialMining"]] <- potentialMining
+  disturbanceList$mining[names(disturbanceList$mining) == "potentialMining"] <- NULL
+  disturbanceList$mining[["potentialMining"]] <- potentialMining
   
-  return(harmonizedList)
+  return(disturbanceList)
 }
