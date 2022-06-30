@@ -41,7 +41,7 @@ defineModule(sim, list(
                                activeProcess = c(NA, NA, "CLAIM_STAT", "PERMIT_STA")), 
                     NA, NA,
                     paste0("Here the user should specify a data.table with the ",
-                           "dataName and dataClasses from the object `harmonizedList` ",
+                           "dataName and dataClasses from the object `disturbanceList` ",
                            "anthroDisturbance_DataPrep, first and (input from ",
                            "second levels) to be combined. The table also contains a ",
                            "column identifying which to be used to filter",
@@ -74,7 +74,7 @@ defineModule(sim, list(
   ),
   inputObjects = bindrows(
     #expectsInput("objectName", "objectClass", "input object description", sourceURL, ...),
-    expectsInput(objectName = "harmonizedList", objectClass = "list",
+    expectsInput(objectName = "disturbanceList", objectClass = "list",
                  desc = paste0("List (general category) of lists (specific ",
                                "class) needed for generating ",
                                "disturbances. This last list contains: ",
@@ -95,7 +95,7 @@ defineModule(sim, list(
   ),
   outputObjects = bindrows(
     #createsOutput("objectName", "objectClass", "output object description", ...),
-    createsOutput(objectName = "harmonizedList", objectClass = "list",
+    createsOutput(objectName = "disturbanceList", objectClass = "list",
                   desc = paste0("List (general category) of lists (specific ",
                                 "class) needed for generating ",
                                 "disturbances. This is a modified input, where we ",
@@ -116,18 +116,18 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
       # schedule future event(s)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialMining")
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialOilGas")
-      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "replaceInHarmonizedList")
+      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "replaceInDisturbanceList")
     },
     createPotentialMining = {
-      sim$potentialMining <- makePotentialMining(harmonizedList = sim$harmonizedList, 
+      sim$potentialMining <- makePotentialMining(disturbanceList = sim$disturbanceList, 
                                                  whatToCombine = P(sim)$whatToCombine)
     },
     createPotentialOilGas = {
-      sim$potentialOilGas <- makePotentialOilGas(harmonizedList = sim$harmonizedList, 
+      sim$potentialOilGas <- makePotentialOilGas(disturbanceList = sim$disturbanceList, 
                                                  whatToCombine = P(sim)$whatToCombine)
     },
-    replaceInHarmonizedList = {
-      sim$harmonizedList <- replaceList(harmonizedList = sim$harmonizedList,
+    replaceInDisturbanceList = {
+      sim$disturbanceList <- replaceList(disturbanceList = sim$disturbanceList,
                                          potentialOil = sim$potentialOilGas,
                                          potentialMining = sim$potentialMining)
     },
@@ -142,14 +142,14 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
   dPath <- asPath(getOption("reproducible.destinationPath", dataPath(sim)), 1)
   message(currentModule(sim), ": using dataPath '", dPath, "'.")
 
-  if (!suppliedElsewhere(object = "harmonizedList", sim = sim)) {
-    sim$harmonizedList <- prepInputs(url = extractURL("harmonizedList"),
+  if (!suppliedElsewhere(object = "disturbanceList", sim = sim)) {
+    sim$disturbanceList <- prepInputs(url = extractURL("disturbanceList"),
                                     destinationPath = dPath,
                                     fun = "qs::qread",
                                     header = TRUE, 
-                                    userTags = "harmonizedListTest")
+                                    userTags = "disturbanceListTest")
     
-    warning(paste0("harmonizedList was not supplied. The current should only ",
+    warning(paste0("disturbanceList was not supplied. The current should only ",
                    " be used for module testing purposes! Please run the module ",
                    "`anthroDisturbance_DataPrep`"), 
             immediate. = TRUE)
