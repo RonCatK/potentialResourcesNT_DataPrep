@@ -30,7 +30,7 @@ defineModule(sim, list(
   documentation = list("README.md", "potentialResourcesNT_DataPrep.Rmd"), ## same file
   reqdPkgs = list("SpaDES.core (>=1.0.10)", "ggplot2", 
                   "PredictiveEcology/reproducible@development",
-                  "raster", "terra", "crayon"),
+                  "raster", "terra", "crayon", "data.table"),
   parameters = rbind(
     #defineParameter("paramName", "paramClass", value, min, max, "parameter description"),
     defineParameter("whatToCombine", "data.table", 
@@ -91,7 +91,12 @@ defineModule(sim, list(
                                "or combines, you might skip this idiosyncratic module",
                                " and directly use the anthroDisturbance_Generator ",
                                "module."), 
-                 sourceURL = NA) # <~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ADD HERE SOMEHOW THE OBJECT!
+                 sourceURL = NA), # <~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ADD HERE SOMEHOW THE OBJECT!
+    expectsInput(objectName = "historicalFires", objectClass = "list",
+                 desc = paste0("List per YEAR of burned polygons. It needs to ",
+                               "contain at least the following columns: YEAR or DECADE.",
+                               "The default layer was created by ENR for the NWT"), 
+                 sourceURL = "https://drive.google.com/file/d/1FpaOl5QZ2YWbO6KdEQayip8yqsHWtGV-/view?usp=sharing")
   ),
   outputObjects = bindrows(
     #createsOutput("objectName", "objectClass", "output object description", ...),
@@ -113,9 +118,14 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
   switch(
     eventType,
     init = {
+      # If the simulations start before 2011, it shouldn't work because of the data
+      if (start(sim) < 2011) stop(paste0("Please revisit your starting year for",
+                                         " the simulations. Simulations shouldn't ",
+                                         "start before 2011."))
       # schedule future event(s)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialMining")
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialOilGas")
+      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialCutblocks")
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "replaceInDisturbanceList")
     },
     createPotentialMining = {
@@ -126,10 +136,16 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
       sim$potentialOilGas <- makePotentialOilGas(disturbanceList = sim$disturbanceList, 
                                                  whatToCombine = P(sim)$whatToCombine)
     },
+    createPotentialCutblocks = {
+      sim$potentialCutblocks <- makePotentialCutblocks(disturbanceList = sim$disturbanceList,
+                                                       currentYear = time(sim),
+                                                       historicalFires = sim$historicalFires)
+    },
     replaceInDisturbanceList = {
       sim$disturbanceList <- replaceList(disturbanceList = sim$disturbanceList,
                                          potentialOil = sim$potentialOilGas,
-                                         potentialMining = sim$potentialMining)
+                                         potentialMining = sim$potentialMining,
+                                         potentialCutblocks = sim$potentialCutblocks)
     },
     warning(paste("Undefined event type: \'", current(sim)[1, "eventType", with = FALSE],
                   "\' in module \'", current(sim)[1, "moduleName", with = FALSE], "\'", sep = ""))
@@ -141,20 +157,50 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
   #cacheTags <- c(currentModule(sim), "function:.inputObjects") ## uncomment this if Cache is being used
   dPath <- asPath(getOption("reproducible.destinationPath", dataPath(sim)), 1)
   message(currentModule(sim), ": using dataPath '", dPath, "'.")
-
+  
   if (!suppliedElsewhere(object = "disturbanceList", sim = sim)) {
     sim$disturbanceList <- prepInputs(url = extractURL("disturbanceList"),
-                                    destinationPath = dPath,
-                                    fun = "qs::qread",
-                                    header = TRUE, 
-                                    userTags = "disturbanceListTest")
+                                      destinationPath = dPath,
+                                      fun = "qs::qread",
+                                      header = TRUE, 
+                                      userTags = "disturbanceListTest")
     
     warning(paste0("disturbanceList was not supplied. The current should only ",
                    " be used for module testing purposes! Please run the module ",
                    "`anthroDisturbance_DataPrep`"), 
             immediate. = TRUE)
   }
-
+  if (!suppliedElsewhere(object = "historicalFires", sim = sim)) {
+    
+    message(crayon::red(paste0("historicalFires was not provided. The function will try ",
+                               "to use a layer created by ENR-NT. If your study ",
+                               "area is NOT in the NWT, please provide historicalFires")))
+    
+    sim$historicalFires <- prepInputs(url = extractURL("historicalFires"),
+                                      destinationPath = dPath,
+                                      studyArea = sim$studyArea,
+                                      alsoExtract = "similar",
+                                      header = TRUE, 
+                                      userTags = "historicalFiresENR")
+    
+    sim$historicalFires <- projectInputs(sim$historicalFires, 
+                                         targetCRS = crs(sim$rasterToMatch))
+    
+    # simplifying
+    historicalFiresS <- sim$historicalFires[, names(sim$historicalFires) %in% c("YEAR", 
+                                                                                "DECADE")]
+    historicalFiresDT <- data.table(historicalFiresS@data)
+    historicalFiresDT[, decadeYear := 5 + (as.numeric(unlist(lapply(
+      strsplit(historicalFiresDT$DECADE, split = "-"), `[[`, 1
+    ))))]
+    historicalFiresDT[, fireYear := fifelse(YEAR == -9999, decadeYear, YEAR)]
+    historicalFiresS$fireYear <- historicalFiresDT$fireYear
+    sim$historicalFires <- historicalFiresS[, "fireYear"]
+    
+    # Discard fires with more than 60 from starting time
+    olderstFireYear <- start(sim) - 60
+    sim$historicalFires <- sim$historicalFires[sim$historicalFires$fireYear >= olderstFireYear, ]
+  }
+  
   return(invisible(sim))
 }
-
