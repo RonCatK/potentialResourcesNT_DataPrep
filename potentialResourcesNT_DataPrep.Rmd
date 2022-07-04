@@ -40,7 +40,7 @@ setPaths(modulePath = file.path("C:/Users/Tati/Documents/GitHub"),
                                create = TRUE))
 getPaths() # shows where the 4 relevant paths are
 
-times <- list(start = 1, end = 1)
+times <- list(start = 2011, end = 2021)
 
 parameters <- list(
   #.progress = list(type = "text", interval = 1), # for a progress bar
