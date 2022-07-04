@@ -1,8 +1,8 @@
 makePotentialMining <- function(disturbanceList, 
                                 whatToCombine){
   laysToWork <- disturbanceList[["mining"]][names(disturbanceList[["mining"]]) %in% 
-                                             whatToCombine[datasetName == "mining", 
-                                                           dataClasses]]
+                                              whatToCombine[datasetName == "mining", 
+                                                            dataClasses]]
   # Get the layers with needed fields
   lays <- lapply(1:length(laysToWork), function(index){
     L <- laysToWork[index][[1]]

@@ -1,8 +1,8 @@
 makePotentialOilGas <- function(disturbanceList, 
                                 whatToCombine){
   laysToWork <- disturbanceList[["oilGas"]][names(disturbanceList[["oilGas"]]) %in% 
-                                             whatToCombine[datasetName == "oilGas", 
-                                                           dataClasses]]
+                                              whatToCombine[datasetName == "oilGas", 
+                                                            dataClasses]]
   whichClaim <- laysToWork[unlist(lapply(laysToWork, function(L){
     return(any(grepl(pattern = "OBJECTID", x = names(L))))
   }))][[1]]
