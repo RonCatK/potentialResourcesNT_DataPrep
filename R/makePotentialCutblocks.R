@@ -27,6 +27,9 @@ makePotentialCutblocks <- function(disturbanceList){
   # ORIGIN
   # 3. CROWNCLOS should be understood as CROWNCL
   
+  # Select forestry potential layer
+  forestPotential <- disturbanceList[["forestry"]][["potentialCutblocks"]]
+  
   productiveForest <- subset(forestPotential, 
                              subset = forestPotential[["SI_50"]] >= 8 &
                                forestPotential[["CROWNCL"]] >= 30)
