@@ -1,6 +1,4 @@
-makePotentialCutblocks <- function(disturbanceList, 
-                                   currentYear,
-                                   historicalFires){
+makePotentialCutblocks <- function(disturbanceList){
   
   # To recreate the potential cutblocks ENR (James Hodson) developed for the
   # NWT, we need to follow his recipe, sent by Kathleen Groenewegen 
@@ -22,19 +20,15 @@ makePotentialCutblocks <- function(disturbanceList,
   # forestry.
   # 
   # NOTES ~TM: 
-  # 1. In the current case, the layers will be updated up to the currentYear
+  # 1. As we also start our simulations in 2011, we don't need to update fire here,
+  #    only in disturbance generator, which controls the updating process. Here we
+  #    only need the potential (productive) forest layer.
   # 2. The age layer is not defined in the explanation, but I believe is this: 
+  # ORIGIN
+  # 3. CROWNCLOS should be understood as CROWNCL
   
-  fireToUse <- historicalFires[historicalFires[["fireYear"]] > currentYear,]
-  if (class(fireToUse) != "SpatVector")
-    fireToUse <- vect(fireToUse) 
-  # Select forestry potential layer
-  forestPotential <- disturbanceList[["forestry"]][["potentialCutblocks"]]
-  # Overlay with fire and update age
-  browser()
-  
-  whichClaim[["Potential"]] <- 1
-  whichClaim <- whichClaim[, "Potential"] #remove all names except potential
-  newPotentialOil <- rbind(whichPotential, whichClaim)
-  return(newPotentialOil)
+  productiveForest <- subset(forestPotential, 
+                             subset = forestPotential[["SI_50"]] >= 8 &
+                               forestPotential[["CROWNCL"]] >= 30)
+  return(productiveForest)
 }
