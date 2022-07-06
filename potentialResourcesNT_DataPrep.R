@@ -30,7 +30,8 @@ defineModule(sim, list(
   documentation = list("README.md", "potentialResourcesNT_DataPrep.Rmd"), ## same file
   reqdPkgs = list("SpaDES.core (>=1.0.10)", "ggplot2", 
                   "PredictiveEcology/reproducible@development",
-                  "raster", "terra", "crayon", "data.table"),
+                  "raster", "terra", "crayon", "data.table", "RCurl",
+                  "tictoc"),
   parameters = rbind(
     #defineParameter("paramName", "paramClass", value, min, max, "parameter description"),
     defineParameter("whatToCombine", "data.table", 
@@ -91,12 +92,8 @@ defineModule(sim, list(
                                "or combines, you might skip this idiosyncratic module",
                                " and directly use the anthroDisturbance_Generator ",
                                "module."), 
-                 sourceURL = NA), # <~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ADD HERE SOMEHOW THE OBJECT!
-    expectsInput(objectName = "historicalFires", objectClass = "list",
-                 desc = paste0("List per YEAR of burned polygons. It needs to ",
-                               "contain at least the following columns: YEAR or DECADE.",
-                               "The default layer was created by ENR for the NWT"), 
-                 sourceURL = "https://drive.google.com/file/d/1FpaOl5QZ2YWbO6KdEQayip8yqsHWtGV-/view?usp=sharing")
+                 sourceURL = "https://drive.google.com/file/d/1i57KRIaw05Kb3IU3RLcf50oQP9synTKX/view?usp=sharing")
+
   ),
   outputObjects = bindrows(
     #createsOutput("objectName", "objectClass", "output object description", ...),
@@ -105,9 +102,10 @@ defineModule(sim, list(
                                 "class) needed for generating ",
                                 "disturbances. This is a modified input, where we ",
                                 "replace multiple potential layers (i.e., mining",
-                                " and oilGas) by only one layer, with the highest",
+                                " and oilGas) by only one layer with the highest",
                                 "values being the ones that need to be filled ",
-                                "with new developments first."))
+                                "with new developments first, or prepare potential layers",
+                                " (i.e., potentialCutblocks)."))
   )
 ))
 
@@ -118,6 +116,7 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
   switch(
     eventType,
     init = {
+
       # If the simulations start before 2011, it shouldn't work because of the data
       if (start(sim) < 2011) stop(paste0("Please revisit your starting year for",
                                          " the simulations. Simulations shouldn't ",
@@ -137,9 +136,7 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
                                                  whatToCombine = P(sim)$whatToCombine)
     },
     createPotentialCutblocks = {
-      sim$potentialCutblocks <- makePotentialCutblocks(disturbanceList = sim$disturbanceList,
-                                                       currentYear = time(sim),
-                                                       historicalFires = sim$historicalFires)
+      sim$potentialCutblocks <- makePotentialCutblocks(disturbanceList = sim$disturbanceList)
     },
     replaceInDisturbanceList = {
       sim$disturbanceList <- replaceList(disturbanceList = sim$disturbanceList,
@@ -159,47 +156,13 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
   message(currentModule(sim), ": using dataPath '", dPath, "'.")
   
   if (!suppliedElsewhere(object = "disturbanceList", sim = sim)) {
-    sim$disturbanceList <- prepInputs(url = extractURL("disturbanceList"),
-                                      destinationPath = dPath,
-                                      fun = "qs::qread",
-                                      header = TRUE, 
-                                      userTags = "disturbanceListTest")
+    sim$disturbanceList <- unwrapTerraList(terraList = extractURL("disturbanceList"), 
+                                           generalPath = dataPath(sim))
     
     warning(paste0("disturbanceList was not supplied. The current should only ",
                    " be used for module testing purposes! Please run the module ",
                    "`anthroDisturbance_DataPrep`"), 
             immediate. = TRUE)
-  }
-  if (!suppliedElsewhere(object = "historicalFires", sim = sim)) {
-    
-    message(crayon::red(paste0("historicalFires was not provided. The function will try ",
-                               "to use a layer created by ENR-NT. If your study ",
-                               "area is NOT in the NWT, please provide historicalFires")))
-    
-    sim$historicalFires <- prepInputs(url = extractURL("historicalFires"),
-                                      destinationPath = dPath,
-                                      studyArea = sim$studyArea,
-                                      alsoExtract = "similar",
-                                      header = TRUE, 
-                                      userTags = "historicalFiresENR")
-    
-    sim$historicalFires <- projectInputs(sim$historicalFires, 
-                                         targetCRS = crs(sim$rasterToMatch))
-    
-    # simplifying
-    historicalFiresS <- sim$historicalFires[, names(sim$historicalFires) %in% c("YEAR", 
-                                                                                "DECADE")]
-    historicalFiresDT <- data.table(historicalFiresS@data)
-    historicalFiresDT[, decadeYear := 5 + (as.numeric(unlist(lapply(
-      strsplit(historicalFiresDT$DECADE, split = "-"), `[[`, 1
-    ))))]
-    historicalFiresDT[, fireYear := fifelse(YEAR == -9999, decadeYear, YEAR)]
-    historicalFiresS$fireYear <- historicalFiresDT$fireYear
-    sim$historicalFires <- historicalFiresS[, "fireYear"]
-    
-    # Discard fires with more than 60 from starting time
-    olderstFireYear <- start(sim) - 60
-    sim$historicalFires <- sim$historicalFires[sim$historicalFires$fireYear >= olderstFireYear, ]
   }
   
   return(invisible(sim))
