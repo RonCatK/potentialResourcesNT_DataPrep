@@ -16,7 +16,7 @@ wrapTerraList <- function(terraList, generalPath, zipFiles = FALSE, uploadZip = 
   })
   names(listNames) <- names(terraList)
   if (zipFiles) {
-   # Need to save the files together with the list
+    # Need to save the files together with the list
     qs::qsave(listNames, file = file.path(generalPath, "theList.qs"))
     allFls <- c(file.path(generalPath, "theList.qs"), 
                 unlist(listNames, use.names = FALSE))
@@ -35,7 +35,8 @@ wrapTerraList <- function(terraList, generalPath, zipFiles = FALSE, uploadZip = 
 
 unwrapTerraList <- function(terraList, generalPath = NULL){
   updatePath <- FALSE
-  if (!is.list(terraList)) {
+  if (all(!is.list(terraList),
+          !file.exists(file.path(generalPath, "theList.qs")))) {
     message(paste0("The terraList file provided seems to be a google drive link. The contents will be",
                    " downloaded and extracted before recovering."))
     # If we pass a URL for the file instead of a list, then first we need to download
@@ -46,6 +47,12 @@ unwrapTerraList <- function(terraList, generalPath = NULL){
           junkpaths = TRUE)
     terraList <- qs::qread(file.path(generalPath, "theList.qs"))
     updatePath <- TRUE
+  } else {
+    if (all(!is.list(terraList),
+            file.exists(file.path(generalPath, "theList.qs")))){
+      terraList <- qs::qread(file.path(generalPath, "theList.qs"))
+      updatePath <- TRUE
+    }
   }
   listNames <- lapply(1:length(names(terraList)), function(index1){
     obj <- lapply(1:length(names(terraList[[index1]])), function(index2){
