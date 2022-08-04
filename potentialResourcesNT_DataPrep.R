@@ -92,7 +92,20 @@ defineModule(sim, list(
                                "or combines, you might skip this idiosyncratic module",
                                " and directly use the anthroDisturbance_Generator ",
                                "module."), 
-                 sourceURL = "https://drive.google.com/file/d/1i57KRIaw05Kb3IU3RLcf50oQP9synTKX/view?usp=sharing")
+                 sourceURL = "https://drive.google.com/file/d/1i57KRIaw05Kb3IU3RLcf50oQP9synTKX/view?usp=sharing"),
+    expectsInput(objectName = "studyArea", 
+                 objectClass = "SpatialPolygonDataFrame|vect", 
+                 desc = paste0("Study area to which the module should be ",
+                               "constrained to. Defaults to NT1+BCR6. Object ",
+                               "can be of class 'vect' from terra package"), 
+                 sourceURL = "https://drive.google.com/file/d/1RPfDeHujm-rUHGjmVs6oYjLKOKDF0x09/view?usp=sharing"),
+    expectsInput(objectName = "rasterToMatch", 
+                 objectClass = "RasterLayer|rast", 
+                 desc = paste0("All spatial outputs will be reprojected and ",
+                               "resampled to it. Defaults to NT1+BCR6. Object ",
+                               "can be of class 'rast' from terra package"), 
+                 sourceURL = "https://drive.google.com/file/d/11yCDc2_Wia2iw_kz0f0jOXrLpL8of2oM/view?usp=sharing")
+    
 
   ),
   outputObjects = bindrows(
@@ -154,6 +167,25 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
   #cacheTags <- c(currentModule(sim), "function:.inputObjects") ## uncomment this if Cache is being used
   dPath <- asPath(getOption("reproducible.destinationPath", dataPath(sim)), 1)
   message(currentModule(sim), ": using dataPath '", dPath, "'.")
+  
+  if (!suppliedElsewhere(object = "studyArea", sim = sim)) {
+    sim$studyArea <- prepInputs(url = extractURL("studyArea"),
+                                targetFile = "NT1_BCR6.shp",
+                                alsoExtract = "similar",
+                                destinationPath = dPath)
+    
+    warning(paste0("studyArea was not supplied. Defaulting to BCR6+NT1 in the",
+                   " Northwest Territories"), immediate. = TRUE)
+  }
+  
+  if (!suppliedElsewhere(object = "rasterToMatch", sim = sim)) {
+    sim$rasterToMatch <- prepInputs(url = extractURL("rasterToMatch"),
+                                    targetFile = "RTM.tif",
+                                    destinationPath = dPath)
+    
+    warning(paste0("rasterToMatch was not supplied. Defaulting to BCR6+NT1 in the",
+                   " Northwest Territories"), immediate. = TRUE)
+  }
   
   if (!suppliedElsewhere(object = "disturbanceList", sim = sim)) {
     sim$disturbanceList <- unwrapTerraList(terraList = extractURL("disturbanceList"), 
