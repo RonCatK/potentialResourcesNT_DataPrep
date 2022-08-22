@@ -7,9 +7,9 @@
 defineModule(sim, list(
   name = "potentialResourcesNT_DataPrep",
   description =  paste0("This is a data preparation module to harmonize different",
-                        " athropogenic disturbance datasets, more specifically, ",
+                        " anthropogenic disturbance datasets, more specifically, ",
                         "mining and oil/gas. It's intended for the Northwest ",
-                        "Territories region (default) and is idyossyncratic.",
+                        "Territories region (default) and is idyosyncratic.",
                         "This means this module is NOT generalizable, but can ",
                         "be used as basis for other types of development. The ",
                         "objective is to create one standardized layer for each",
@@ -74,7 +74,6 @@ defineModule(sim, list(
                     "Should caching of events or module be used?")
   ),
   inputObjects = bindrows(
-    #expectsInput("objectName", "objectClass", "input object description", sourceURL, ...),
     expectsInput(objectName = "disturbanceList", objectClass = "list",
                  desc = paste0("List (general category) of lists (specific ",
                                "class) needed for generating ",
@@ -85,14 +84,13 @@ defineModule(sim, list(
                                "for any potential resources that need idiosyncratic",
                                " processing. This  means that each combination ",
                                "of dataName and dataClass (except for 'potential')",
-                               " will only have only one element. Another module",
-                               "can deal with the potential layers. For the ",
-                               "current defaults, this is the potentialResourcesNT_DataPrep",
-                               "If none of the potential layers needs to be modified ",
-                               "or combines, you might skip this idiosyncratic module",
-                               " and directly use the anthroDisturbance_Generator ",
-                               "module."), 
-                 sourceURL = "https://drive.google.com/file/d/1i57KRIaw05Kb3IU3RLcf50oQP9synTKX/view?usp=sharing"),
+                               " will only have only one element."), 
+                 sourceURL = "https://drive.google.com/file/d/1v7MpENdhspkWxHPZMlmx9UPCGFYGbbYm/view?usp=sharing"),
+    expectsInput(objectName = "historicalFires", objectClass = "list",
+                 desc = paste0("List per YEAR of burned polygons. It needs to ",
+                               "contain at least the following columns: YEAR or DECADE.",
+                               "The default layer was created by ENR for the NWT"), 
+                 sourceURL = "https://drive.google.com/file/d/1FpaOl5QZ2YWbO6KdEQayip8yqsHWtGV-/view?usp=sharing"),
     expectsInput(objectName = "studyArea", 
                  objectClass = "SpatialPolygonDataFrame|vect", 
                  desc = paste0("Study area to which the module should be ",
@@ -105,11 +103,8 @@ defineModule(sim, list(
                                "resampled to it. Defaults to NT1+BCR6. Object ",
                                "can be of class 'rast' from terra package"), 
                  sourceURL = "https://drive.google.com/file/d/11yCDc2_Wia2iw_kz0f0jOXrLpL8of2oM/view?usp=sharing")
-    
-
   ),
   outputObjects = bindrows(
-    #createsOutput("objectName", "objectClass", "output object description", ...),
     createsOutput(objectName = "disturbanceList", objectClass = "list",
                   desc = paste0("List (general category) of lists (specific ",
                                 "class) needed for generating ",
