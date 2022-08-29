@@ -108,7 +108,7 @@ The module expects four inputs:
 
 The other two inputs needed by this module are the the study area (`studyArea`) and a raster (`rasterToMatch`) that matches the study area and provides the spatial resolution for the simulations.  
 
-```{r moduleInputs, echo = FALSE, eval = TRUE}
+```{r moduleInputs}
 df_inputs <- SpaDES.core::moduleInputs("potentialMiningAndOil", moduleDir)
 knitr::kable(df_inputs)
 ```
@@ -117,7 +117,7 @@ knitr::kable(df_inputs)
 
 The module outputs only one object, the `disturbanceList`, which is a modified version of the input one, where multiple potential layers (i.e., mining and oilGas) have been replaced by only one layer, with the highest values being the ones that need to be filled with new developments first.  
 
-```{r moduleOutputs, echo = FALSE, eval = TRUE}
+```{r moduleOutputs}
 df_outputs <- SpaDES.core::moduleOutputs("potentialMiningAndOil", moduleDir)
 knitr::kable(df_outputs)
 ```
