@@ -3,16 +3,13 @@ title: "potentialResourcesNT_DataPrep"
 author: "Tati Micheletti"
 date: "27 June 2022"
 output:
-  pdf_document: default
   html_document:
     keep_md: yes
 editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval = FALSE, results = "hold")
-```
+
 
 # Overview
 
@@ -20,7 +17,8 @@ This is a data preparation module to harmonize different anthropogenic disturban
 
 # Usage
 
-```{r module_usage}
+
+```r
 if(!require("Require")){
     install.packages("Require")
 }
@@ -77,14 +75,22 @@ disturbanceList <- simInitAndSpades(times = times,
 This module has one parameter that can be adjusted by the user:  
 - `whatToCombine`: This is a data.table and defaults to:  
 
-``` {r whatToCombine, eval = TRUE}
 
+```r
 DT <- data.table::data.table(datasetName = c("oilGas", "oilGas", "mining", "mining"),
                                dataClasses = c("potentialOilGas", "potentialOilGas", 
                                                "potentialMining", "potentialMining"),
                                toDifferentiate = c(NA, "C2H4_BCR6_NT1", "CLAIM_STAT", "PERMIT_STA"),
                                activeProcess = c(NA, NA, "CLAIM_STAT", "PERMIT_STA"))
 print(DT)
+```
+
+```
+##    datasetName     dataClasses toDifferentiate activeProcess
+## 1:      oilGas potentialOilGas            <NA>          <NA>
+## 2:      oilGas potentialOilGas   C2H4_BCR6_NT1          <NA>
+## 3:      mining potentialMining      CLAIM_STAT    CLAIM_STAT
+## 4:      mining potentialMining      PERMIT_STA    PERMIT_STA
 ```
 
 Here the user should specify a data.table with the `dataName` and `dataClasses` from the object `disturbanceList` from the module `anthroDisturbance_DataPrep` to be combined. The table also contains a column identifying which to be used to filter active processes for mining (i.e., `CLAIM_STAT` and `PERMIT_STA`). For Oil/Gas, it needs to identify which layer is the potential one (C2H4_BCR6_NT1) and which is used to constrain where oil and gas will be added. For oil and gas, the other potential layer (exploration permits) is used as a starting point to add structures, followed by randomly placing them in the highest values of `C2H4_BCR6_NT1` and going down until the total amount is reached. For mining, `CLAIM_STAT` is the potential exploration, while `PERMIT_STA` are the ones that might become CLAIMS. The most likely values are `CLAIMS` and followed by `PERMITS`;  
@@ -109,7 +115,8 @@ The module expects four inputs:
 
 The other two inputs needed by this module are the the study area (`studyArea`) and a raster (`rasterToMatch`) that matches the study area and provides the spatial resolution for the simulations.  
 
-```{r moduleInputs}
+
+```r
 df_inputs <- SpaDES.core::moduleInputs("potentialMiningAndOil", moduleDir)
 knitr::kable(df_inputs)
 ```
@@ -118,7 +125,8 @@ knitr::kable(df_inputs)
 
 The module outputs only one object, the `disturbanceList`, which is a modified version of the input one, where multiple potential layers (i.e., mining and oilGas) have been replaced by only one layer, with the highest values being the ones that need to be filled with new developments first.  
 
-```{r moduleOutputs}
+
+```r
 df_outputs <- SpaDES.core::moduleOutputs("potentialMiningAndOil", moduleDir)
 knitr::kable(df_outputs)
 ```
