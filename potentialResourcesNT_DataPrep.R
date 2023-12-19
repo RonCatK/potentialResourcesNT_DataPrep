@@ -29,7 +29,7 @@ defineModule(sim, list(
   citation = list("citation.bib"),
   documentation = list("README.md", "potentialResourcesNT_DataPrep.Rmd"), ## same file
   reqdPkgs = list("SpaDES.core (>=1.0.10)", "ggplot2", 
-                  "PredictiveEcology/reproducible@development",
+                  "PredictiveEcology/reproducible",
                   "raster", "terra", "crayon", "data.table", "RCurl",
                   "tictoc"),
   parameters = rbind(
@@ -86,11 +86,11 @@ defineModule(sim, list(
                                "of dataName and dataClass (except for 'potential')",
                                " will only have only one element."), 
                  sourceURL = "https://drive.google.com/file/d/1v7MpENdhspkWxHPZMlmx9UPCGFYGbbYm/view?usp=sharing"),
-    expectsInput(objectName = "historicalFires", objectClass = "list",
-                 desc = paste0("List per YEAR of burned polygons. It needs to ",
-                               "contain at least the following columns: YEAR or DECADE.",
-                               "The default layer was created by ENR for the NWT"), 
-                 sourceURL = "https://drive.google.com/file/d/1FpaOl5QZ2YWbO6KdEQayip8yqsHWtGV-/view?usp=sharing"),
+    # expectsInput(objectName = "historicalFires", objectClass = "list",
+    #              desc = paste0("List per YEAR of burned polygons. It needs to ",
+    #                            "contain at least the following columns: YEAR or DECADE.",
+    #                            "The default layer was created by ENR for the NWT"), 
+    #              sourceURL = "https://drive.google.com/file/d/1FpaOl5QZ2YWbO6KdEQayip8yqsHWtGV-/view?usp=sharing"),
     expectsInput(objectName = "studyArea", 
                  objectClass = "SpatialPolygonDataFrame|vect", 
                  desc = paste0("Study area to which the module should be ",
@@ -184,7 +184,7 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
   
   if (!suppliedElsewhere(object = "disturbanceList", sim = sim)) {
     sim$disturbanceList <- unwrapTerraList(terraList = extractURL("disturbanceList"), 
-                                           generalPath = dataPath(sim))
+                                           generalPath = dPath)
     
     warning(paste0("disturbanceList was not supplied. The current should only ",
                    " be used for module testing purposes! Please run the module ",
