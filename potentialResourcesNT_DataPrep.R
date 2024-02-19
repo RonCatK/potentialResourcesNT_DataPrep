@@ -130,10 +130,10 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
                                          " the simulations. Simulations shouldn't ",
                                          "start before 2011."))
       # schedule future event(s)
-      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialMining")
-      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialOilGas")
-      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialCutblocks")
-      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "replaceInDisturbanceList")
+      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialMining", eventPriority = 3)
+      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialOilGas", eventPriority = 3)
+      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialCutblocks", eventPriority = 3)
+      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "replaceInDisturbanceList", eventPriority = 3)
     },
     createPotentialMining = {
       sim$potentialMining <- makePotentialMining(disturbanceList = sim$disturbanceList, 
