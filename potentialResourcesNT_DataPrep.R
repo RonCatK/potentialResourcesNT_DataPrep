@@ -113,7 +113,9 @@ defineModule(sim, list(
                                 " and oilGas) by only one layer with the highest",
                                 "values being the ones that need to be filled ",
                                 "with new developments first, or prepare potential layers",
-                                " (i.e., potentialCutblocks)."))
+                                " (i.e., potentialCutblocks).")),
+    createsOutput(objectName = "potentialOilGas", objectClass = "list",
+                  desc = paste0("List (general category) of lists (specific "))
   )
 ))
 
@@ -133,6 +135,7 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialMining", eventPriority = 3)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialOilGas", eventPriority = 3)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialCutblocks", eventPriority = 3)
+      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialSeismicLines", eventPriority = 3)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "replaceInDisturbanceList", eventPriority = 3)
     },
     createPotentialMining = {
@@ -146,11 +149,16 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
     createPotentialCutblocks = {
       sim$potentialCutblocks <- makePotentialCutblocks(disturbanceList = sim$disturbanceList)
     },
+    createPotentialSeismicLines = {
+      sim$potentialSeismicLines <- makePotentialSeismicLines(disturbanceList = sim$disturbanceList, 
+                                                             whatToCombine = P(sim)$whatToCombine)
+    },
     replaceInDisturbanceList = {
       sim$disturbanceList <- replaceList(disturbanceList = sim$disturbanceList,
                                          potentialOil = sim$potentialOilGas,
                                          potentialMining = sim$potentialMining,
-                                         potentialCutblocks = sim$potentialCutblocks)
+                                         potentialCutblocks = sim$potentialCutblocks,
+                                         potentialSeismicLines = sim$potentialSeismicLines)
     },
     warning(paste("Undefined event type: \'", current(sim)[1, "eventType", with = FALSE],
                   "\' in module \'", current(sim)[1, "moduleName", with = FALSE], "\'", sep = ""))
