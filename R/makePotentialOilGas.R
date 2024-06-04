@@ -14,7 +14,7 @@ makePotentialOilGas <- function(disturbanceList,
   whichPotential[["Potential"]] <- as.numeric(whichPotential[["Band_1"]][[1]])+1
   whichPotential <- whichPotential[, "Potential"] #remove all names except potential
   
-  whichClaim[["Potential"]] <- 1
+  whichClaim[["Potential"]] <- as.numeric(max(whichPotential))+1 # Maximum potential is in already claimed areas
   whichClaim <- whichClaim[, "Potential"] #remove all names except potential
   newPotentialOil <- rbind(whichPotential, whichClaim)
   return(newPotentialOil)
