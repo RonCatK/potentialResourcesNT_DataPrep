@@ -14,9 +14,11 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE, results = "hold")
 ```
 
+# Version 1.0.0
+
 # Overview
 
-This is a data preparation module to harmonize different anthropogenic disturbance datasets, more specifically, mining and oil/gas. It's intended for the Northwest Territories region (default) and is idiosyncratic.This means this module is NOT generalizable, but can be used as basis for other types of development. The objective is to create one standardized layer for each of the potential resources that has increasing values for most prioritized places (i.e., higher values, more likely structures will appear).
+This is a data preparation module to harmonize different anthropogenic disturbance datasets, more specifically, mining, oil and gas, seismic lines and cutblocks. It's intended for the Northwest Territories region (default) and is idiosyncratic.This means this module is NOT generalizable, but can be used as basis for other types of development. The objective is to create one standardized layer for each of the potential resources that has increasing values for most prioritized places (i.e., higher values, more likely structures will appear).
 
 # Usage
 
@@ -91,7 +93,7 @@ Here the user should specify a data.table with the `dataName` and `dataClasses` 
 
 # Events
 
-This module contains four events, which are similar in objective, but specific in the inputs and outputs. All events (`createPotentialMining`, `createPotentialOilGas`, `createPotentialCutblocks`, and `replaceInDisturbanceList`) aim at working on all current and potential disturbance layers, unifying these, and setting the highest values as the locations that need to be filled with new developments first, or prepare potential layers. An important note is that for the function `makePotentialCutblocks()`, we recreated the steps done by ENR (J. Hodson) to create the potential forest. Specific information can be found as comments in the function.  
+This module contains four events, which are similar in objective, but specific in the inputs and outputs. All events (`createPotentialMining`, `createPotentialOilGas`, `createPotentialCutblocks`, `createPotentialSeismicLines` and `replaceInDisturbanceList`) aim at working on all current and potential disturbance layers, unifying these, and setting the highest values as the locations that need to be filled with new developments first, or prepare potential layers. An important note is that for the function `makePotentialCutblocks()`, we recreated the steps done by ENR (J. Hodson) to create the potential forest. Specific information can be found as comments in the function.  
 
 # Data dependencies
 
@@ -101,16 +103,16 @@ This module can be run without any inputs from the user and will automatically d
 
 ## Input data
 
-The module expects four inputs:  
+The module expects three specific inputs: disturbanceList, studyArea and rasterToMatch:
+
 - `disturbanceList`: List (general category or sector) of lists (specific class or sub-sector) needed for generating disturbances. The sub-sector last list contains:     
   + Outter list's names: `dataName` from `disturbanceDT`;  
   + Inner list's names: `dataClass` from disturbanceDT, which is a unique class after harmozining, except for any potential resources that need idiosyncratic processing. This  means that each combination of `dataName` and `dataClass` (except for 'potential') will only have only one element;  
-- `historicalFires`: List per `YEAR` of burned polygons. It needs to contain at least the following columns: `YEAR` or `DECADE`. The default layer was created by ENR for the NT.
 
 The other two inputs needed by this module are the the study area (`studyArea`) and a raster (`rasterToMatch`) that matches the study area and provides the spatial resolution for the simulations.  
 
 ```{r moduleInputs}
-df_inputs <- SpaDES.core::moduleInputs("potentialMiningAndOil", moduleDir)
+df_inputs <- SpaDES.core::moduleInputs("potentialResourcesNT_DataPrep", moduleDir)
 knitr::kable(df_inputs)
 ```
 
@@ -119,7 +121,7 @@ knitr::kable(df_inputs)
 The module outputs only one object, the `disturbanceList`, which is a modified version of the input one, where multiple potential layers (i.e., mining and oilGas) have been replaced by only one layer, with the highest values being the ones that need to be filled with new developments first.  
 
 ```{r moduleOutputs}
-df_outputs <- SpaDES.core::moduleOutputs("potentialMiningAndOil", moduleDir)
+df_outputs <- SpaDES.core::moduleOutputs("potentialResourcesNT_DataPrep", moduleDir)
 knitr::kable(df_outputs)
 ```
 
