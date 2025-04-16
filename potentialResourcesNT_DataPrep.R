@@ -129,8 +129,8 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
       # schedule future event(s)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialMining", eventPriority = 3)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialOilGas", eventPriority = 3)
-      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialCutblocks", eventPriority = 3)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialSeismicLines", eventPriority = 3)
+      sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "createPotentialCutblocks", eventPriority = 3)
       sim <- scheduleEvent(sim, start(sim), "potentialResourcesNT_DataPrep", "replaceInDisturbanceList", eventPriority = 3)
     },
     createPotentialMining = {
@@ -141,12 +141,15 @@ doEvent.potentialResourcesNT_DataPrep = function(sim, eventTime, eventType) {
       sim$potentialOilGas <- makePotentialOilGas(disturbanceList = sim$disturbanceList, 
                                                  whatToCombine = P(sim)$whatToCombine)
     },
+    createPotentialSeismicLines = {
+      # We use the same potential layers for seismic lines than for oilGas. Here we have an extra
+      # function only for organizational purposes! As we don't use the existing seismicLines to 
+      # determine where the oil potential is (but the oil facilities and C2H4 layer), 
+      # we do not need to create an extra layer. Therefore, we use the same as potential Oil
+      sim$potentialSeismicLines <- copy(sim$potentialOilGas)
+    },
     createPotentialCutblocks = {
       sim$potentialCutblocks <- makePotentialCutblocks(disturbanceList = sim$disturbanceList)
-    },
-    createPotentialSeismicLines = {
-      sim$potentialSeismicLines <- makePotentialSeismicLines(disturbanceList = sim$disturbanceList, 
-                                                             whatToCombine = P(sim)$whatToCombine)
     },
     replaceInDisturbanceList = {
       sim$disturbanceList <- replaceList(disturbanceList = sim$disturbanceList,
