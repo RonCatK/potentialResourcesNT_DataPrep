@@ -5,6 +5,10 @@ makePotentialSeismicLines <- function(disturbanceList,
   laysToWork <- disturbanceList[["oilGas"]][names(disturbanceList[["oilGas"]]) %in% 
                                               whatToCombine[datasetName == "oilGas", 
                                                             dataClasses]]
+  if (is.null(laysToWork)){
+    message("No potential for seismic lines in the study area. Returning NULL")
+    return(NULL)
+  } 
   
   whichClaim <- laysToWork[unlist(lapply(laysToWork, function(L){
     return(any(grepl(pattern = "OBJECTID", x = names(L))))

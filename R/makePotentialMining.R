@@ -11,6 +11,10 @@ makePotentialMining <- function(disturbanceList,
   laysToWork <- disturbanceList[["mining"]][names(disturbanceList[["mining"]]) %in%
                                               whatToCombine[datasetName == "mining",
                                                             dataClasses]]
+  if (is.null(laysToWork)){
+    message("No potential mining in the study area. Returning NULL")
+    return(NULL)
+  } 
   whichLayers <- lapply(1:length(laysToWork), function(index){
     L <- laysToWork[[index]]
     whichTypeIndex <- unique(valueType[["type"]][which(valueType[["type"]] %in% names(L))])

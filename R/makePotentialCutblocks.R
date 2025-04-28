@@ -30,6 +30,11 @@ makePotentialCutblocks <- function(disturbanceList){
   # Select forestry potential layer
   forestPotential <- disturbanceList[["forestry"]][["potentialCutblocks"]]
   
+  if (is.null(forestPotential)){
+    message("No potential for forestry in the study area. Returning NULL")
+    return(NULL)
+  } 
+  
   productiveForest <- subset(forestPotential, 
                              subset = forestPotential[["SI_50"]] >= 8 &
                                forestPotential[["CROWNCL"]] >= 30)
