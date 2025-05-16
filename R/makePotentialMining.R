@@ -11,7 +11,7 @@ makePotentialMining <- function(disturbanceList,
   laysToWork <- disturbanceList[["mining"]][names(disturbanceList[["mining"]]) %in%
                                               whatToCombine[datasetName == "mining",
                                                             dataClasses]]
-  if (is.null(laysToWork)){
+  if (any(is.null(laysToWork), length(laysToWork) == 0)){
     message("No potential mining in the study area. Returning NULL")
     return(NULL)
   } 
