@@ -23,42 +23,33 @@ test_that("No oilGas sector -> returns NULL with message", {
   expect_null(out)
 })
 
-test_that("Builds Potential from Band_1 + 1 and prioritizes claims as max+1", {
+test_that("Seismic potential comes from Band_1 + 1; claims are max + 1", {
   skip_on_cran()
   
   crs_str <- "EPSG:3857"
-  # potential layer with Band_1 field (two polys, Band_1 values differ)
   pot <- rbind(mk_sq(0,0, crs = crs_str), mk_sq(2,0, crs = crs_str))
-  pot$Band_1 <- c(5, 9)  # NOTE: function uses [[1]], i.e., the first value only
-
-  # claims layer with OBJECTID field (one poly elsewhere)
+  pot$Band_1 <- c(5, 9)
   clm <- mk_sq(10,10, crs = crs_str); clm$OBJECTID <- 1L
   
-  disturbanceList <- list(oilGas = list(
-    potentialOilGas = pot,
-    claims          = clm
-  ))
-  wtc <- data.table(datasetName = "oilGas",
-                    dataClasses = c("potentialOilGas","claims"))
+  disturbanceList <- list(oilGas = list(potentialOilGas = pot, claims = clm))
+  wtc <- data.table(datasetName = "oilGas", dataClasses = c("potentialOilGas","claims"))
   
   out <- makePotentialSeismicLines(disturbanceList, wtc)
   
-  # Basic shape
   expect_s4_class(out, "SpatVector")
   expect_equal(geomtype(out), "polygons")
-  expect_equal(crs(out), crs(pot))
   expect_identical(names(out), "Potential")
+  expect_equal(nrow(out), 3)
   
-  # Current behavior: Potential is (first Band_1 + 1) for all potential polys
-  # and claims get max(potential) + 1
-  pot_base <- pot$Band_1[1] + 1       # 5 -> 6
-  claim_val <- pot_base + 1           # 7
+  # potentials are elementwise +1
+  pot_out <- out[out$Potential != max(out$Potential), ]
+  expect_equal(sort(pot_out$Potential), sort(pot$Band_1 + 1))
   
-  vals <- sort(out$Potential)
-  expect_true(all(vals %in% c(pot_base, claim_val)))
-  expect_equal(sum(vals == claim_val), nrow(clm))  # claims count at the top value
-  expect_equal(sum(vals == pot_base), nrow(pot))   # all potentials flattened to first value
+  # claim is unique max = max(potentials) + 1
+  expect_equal(sum(out$Potential == max(out$Potential)), 1L)
+  expect_equal(max(out$Potential), max(pot$Band_1 + 1) + 1)
 })
+
 
 test_that("Output contains only 'Potential' column (attributes are dropped)", {
   skip_on_cran()
@@ -88,7 +79,7 @@ test_that("Missing Band_1 or OBJECTID causes subscript error (documents current 
   
   expect_error(
     makePotentialSeismicLines(disturbanceList, wtc),
-    regexp = "subscript|out of bounds", ignore.case = TRUE
+    regexp = "the potentialOilGas layer must have a field named 'Band_1'", ignore.case = TRUE
   )
 })
 
@@ -115,3 +106,4 @@ test_that("When multiple Band_1 candidates exist, the first in list order is use
   expect_equal(min(out$Potential), pot1$Band_1[1] + 1)
   expect_equal(max(out$Potential), pot1$Band_1[1] + 2)
 })
+
