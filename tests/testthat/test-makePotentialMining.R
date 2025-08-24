@@ -1,9 +1,5 @@
 # tests/testthat/test-makePotentialMining.R
 
-library(testthat)
-library(terra)
-library(data.table)
-
 # --- small helpers ---------------------------------------------------------
 mk_sq <- function(xmin, ymin, size = 10, crs = "EPSG:3857", atts = list()) {
   coords <- matrix(

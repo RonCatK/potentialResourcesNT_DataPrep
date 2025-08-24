@@ -2,6 +2,20 @@
 # please specify the package you need to run the sim function in the test files.
 
 ### Setup ######################################################################
+# List of packages to install and load
+pkgs <- c("covr", "DT", "htmltools", "htmlwidgets", "testthat", "terra", "data.table")
+
+# Check which packages are not installed
+to_install <- setdiff(pkgs, rownames(installed.packages()))
+
+# Install missing packages
+if (length(to_install)) {
+  install.packages(to_install)
+}
+
+# Load all packages
+invisible(sapply(pkgs, library, character.only = TRUE))
+
 Paths <<- list(
   inputPath  = tempdir(),
   outputPath = tempdir()
@@ -11,3 +25,11 @@ invisible(lapply(r_scripts, source))
 
 # to test all the test files in the tests folder:
 testthat::test_dir(file.path("tests", "testthat"))
+
+### Test Coverage ##############################################################
+src <- list.files("R", pattern = "\\.R$", full.names = TRUE)
+tst <- list.files("tests/testthat", pattern = "^test-.*\\.R$", full.names = TRUE)
+
+cov <- file_coverage(source_files = src, test_files = tst)
+percent_coverage(cov)
+covr::report(cov, file = "coverage.html", browse = interactive())

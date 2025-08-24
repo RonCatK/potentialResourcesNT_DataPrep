@@ -1,6 +1,4 @@
 # tests/testthat/test-makePotentialOilGas.R
-library(terra)
-library(data.table)
 
 testthat::test_that("makePotentialOilGas: setup sanity", {
   testthat::skip_on_cran()

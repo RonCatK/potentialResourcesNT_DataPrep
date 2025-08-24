@@ -1,10 +1,6 @@
 # test-makePotentialSeismicLines.R
 # Tests for makePotentialSeismicLines()
 
-library(testthat)
-library(terra)
-library(data.table)
-
 mk_sq <- function(x0, y0, size = 1, crs = "EPSG:3857") {
   vect(matrix(c(x0,y0, x0+size,y0, x0+size,y0+size, x0,y0+size, x0,y0),
               ncol = 2, byrow = TRUE), type = "polygons", crs = crs)

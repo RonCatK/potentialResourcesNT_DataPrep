@@ -1,11 +1,6 @@
 # tests/testthat/test-makePotentialCutblocks.R
 skip_on_cran()
 
-library(testthat)
-library(terra)
-library(glue)
-library(diffobj)
-
 # ---- helpers ---------------------------------------------------------------
 
 mk_sq <- function(xmin, ymin, size = 10, crs = "EPSG:3857",
