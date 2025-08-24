@@ -23,6 +23,8 @@ Paths <<- list(
 r_scripts <- list.files("R", full.names = TRUE, pattern = "\\.R$")
 invisible(lapply(r_scripts, source))
 
+
+### Testing ####################################################################
 # to test all the test files in the tests folder:
 testthat::test_dir(file.path("tests", "testthat"))
 
