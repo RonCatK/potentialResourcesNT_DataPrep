@@ -95,16 +95,17 @@ test_that("Missing mining sector returns NULL with message", {
   expect_null(out)
 })
 
-test_that("If no requested mining classes exist, function errors when combining (documents current behaviour)", {
+test_that("If no requested mining classes exist, function returns NULL with message", {
   skip_on_cran()
   
   # mining list exists but with different names -> laysToWork becomes length-0 list
   dl_empty_pick <- list(mining = list(otherLayer = claims))
-  expect_error(
-    makePotentialMining(dl_empty_pick, whatToCombine_ok),
-    regexp = "subscript|No potential|length.*zero",
+  expect_message(
+    out <- makePotentialMining(dl_empty_pick, whatToCombine_ok),
+    regexp = "No potential mining.*Returning NULL",
     ignore.case = TRUE
   )
+  expect_null(out)
 })
 
 test_that("Claims-only and Permits-only produce expected Potential sets", {
@@ -226,4 +227,3 @@ test_that("Unreferenced mining layers are ignored", {
   expect_equal(nrow(res), 1)
   expect_equal(unique(res$Potential), 4)
 })
-
