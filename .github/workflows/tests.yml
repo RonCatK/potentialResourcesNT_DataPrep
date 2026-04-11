@@ -71,10 +71,7 @@ jobs:
       - name: Install light dependencies
         run: |
           Rscript --vanilla - <<'RS'
-          options(
-            pkgType = "binary",
-            repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/noble/2026-01-05")
-          )
+          options(repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/noble/2026-01-05"))
           cran_packages <- c(
             "covr", "testthat", "withr", "terra", "data.table",
             "Require", "mockery", "DT", "htmltools", "htmlwidgets",
